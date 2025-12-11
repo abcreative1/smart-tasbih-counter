@@ -5,6 +5,7 @@ import CounterRing from './components/CounterRing';
 import TasbihList from './components/TasbihList';
 import AddTasbihModal from './components/AddTasbihModal';
 import EditCountModal from './components/EditCountModal';
+import EditTasbihModal from './components/EditTasbihModal';
 import AIInsight from './components/AIInsight';
 import AnalyticsView from './components/AnalyticsView';
 import { ChevronLeft, BarChart2 } from 'lucide-react';
@@ -13,8 +14,13 @@ const App: React.FC = () => {
   const [tasbihs, setTasbihs] = useState<Tasbih[]>([]);
   const [activeTasbihId, setActiveTasbihId] = useState<string | null>(null);
   const [view, setView] = useState<ViewState>('LIBRARY');
+  
+  // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditCountModalOpen, setIsEditCountModalOpen] = useState(false);
+  const [isEditTasbihModalOpen, setIsEditTasbihModalOpen] = useState(false);
+  const [editingTasbih, setEditingTasbih] = useState<Tasbih | null>(null);
+
   const isLoadedRef = useRef(false);
 
   // Initial Load of Data and State
@@ -87,17 +93,11 @@ const App: React.FC = () => {
       if (!activeTasbihId) return;
       setTasbihs(prev => prev.map(t => {
           if (t.id === activeTasbihId) {
-              // Calculate difference to update total count appropriately if desired, 
-              // or just update current count. Here we just update current count.
-              // To keep total consistent, we might assume user counted offline and wants to add that difference to total too.
-              // For simplicity, let's just update count and assume total tracks clicks within app.
-              // OR: If newCount > count, add difference to total.
-              let diff = newCount - t.count;
+              const diff = newCount - t.count;
               let newTotal = t.totalCount;
               if (diff > 0) {
                   newTotal += diff;
               }
-              
               return { ...t, count: newCount, totalCount: newTotal };
           }
           return t;
@@ -116,6 +116,22 @@ const App: React.FC = () => {
 
   const handleAdd = (newTasbih: Tasbih) => {
     setTasbihs(prev => [...prev, newTasbih]);
+  };
+
+  const handleEditTasbih = (tasbih: Tasbih) => {
+    setEditingTasbih(tasbih);
+    setIsEditTasbihModalOpen(true);
+  };
+
+  const handleSaveTasbih = (updatedTasbih: Tasbih) => {
+    setTasbihs(prev => prev.map(t => t.id === updatedTasbih.id ? updatedTasbih : t));
+    setEditingTasbih(null);
+  };
+
+  const handleToggleFavorite = (id: string) => {
+    setTasbihs(prev => prev.map(t => 
+      t.id === id ? { ...t, isFavorite: !t.isFavorite } : t
+    ));
   };
 
   const selectTasbih = (id: string) => {
@@ -185,6 +201,8 @@ const App: React.FC = () => {
             tasbihs={tasbihs} 
             onSelect={selectTasbih} 
             onDelete={handleDelete}
+            onEdit={handleEditTasbih}
+            onToggleFavorite={handleToggleFavorite}
             onAdd={() => setIsAddModalOpen(true)}
           />
         )}
@@ -209,7 +227,7 @@ const App: React.FC = () => {
               target={activeTasbih.target}
               onIncrement={handleIncrement}
               onReset={handleReset}
-              onEdit={() => setIsEditModalOpen(true)}
+              onEdit={() => setIsEditCountModalOpen(true)}
               color={activeTasbih.color || 'emerald'}
             />
 
@@ -231,11 +249,20 @@ const App: React.FC = () => {
       
       {activeTasbih && (
           <EditCountModal 
-            isOpen={isEditModalOpen}
+            isOpen={isEditCountModalOpen}
             currentCount={activeTasbih.count}
-            onClose={() => setIsEditModalOpen(false)}
+            onClose={() => setIsEditCountModalOpen(false)}
             onSave={handleUpdateCount}
           />
+      )}
+
+      {editingTasbih && (
+        <EditTasbihModal
+          isOpen={isEditTasbihModalOpen}
+          tasbih={editingTasbih}
+          onClose={() => setIsEditTasbihModalOpen(false)}
+          onSave={handleSaveTasbih}
+        />
       )}
 
     </div>

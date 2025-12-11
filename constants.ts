@@ -9,7 +9,8 @@ export const PREDEFINED_TASBIHS: Tasbih[] = [
     count: 0,
     totalCount: 0,
     color: 'emerald',
-    dailyCounts: {}
+    dailyCounts: {},
+    isFavorite: false
   },
   {
     id: 'default-2',
@@ -19,7 +20,8 @@ export const PREDEFINED_TASBIHS: Tasbih[] = [
     count: 0,
     totalCount: 0,
     color: 'emerald',
-    dailyCounts: {}
+    dailyCounts: {},
+    isFavorite: false
   },
   {
     id: 'default-3',
@@ -29,7 +31,8 @@ export const PREDEFINED_TASBIHS: Tasbih[] = [
     count: 0,
     totalCount: 0,
     color: 'emerald',
-    dailyCounts: {}
+    dailyCounts: {},
+    isFavorite: false
   },
   {
     id: 'default-4',
@@ -39,7 +42,8 @@ export const PREDEFINED_TASBIHS: Tasbih[] = [
     count: 0,
     totalCount: 0,
     color: 'gold',
-    dailyCounts: {}
+    dailyCounts: {},
+    isFavorite: false
   },
   {
     id: 'default-5',
@@ -49,7 +53,8 @@ export const PREDEFINED_TASBIHS: Tasbih[] = [
     count: 0,
     totalCount: 0,
     color: 'gold',
-    dailyCounts: {}
+    dailyCounts: {},
+    isFavorite: false
   }
 ];
 

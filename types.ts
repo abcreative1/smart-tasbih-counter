@@ -7,6 +7,7 @@ export interface Tasbih {
   totalCount: number; // Lifetime count for this tasbih
   color?: string;
   dailyCounts: Record<string, number>; // Format: "YYYY-MM-DD": count
+  isFavorite?: boolean;
 }
 
 export interface TasbihLog {
