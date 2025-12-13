@@ -15,7 +15,7 @@ export interface TasbihLog {
   count: number;
 }
 
-export type ViewState = 'COUNTER' | 'LIBRARY' | 'STATS';
+export type ViewState = 'COUNTER' | 'LIBRARY' | 'STATS' | 'LANDING';
 
 export interface AppState {
   activeTasbihId: string | null;
