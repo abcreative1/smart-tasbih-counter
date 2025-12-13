@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { RefreshCcw, Pencil } from 'lucide-react';
+import { RefreshCcw, Pencil, Target } from 'lucide-react';
 
 interface CounterRingProps {
   count: number;
   target: number;
   onIncrement: () => void;
   onReset: () => void;
-  onEdit: () => void;
+  onEditCount: () => void;
+  onEditTarget: () => void;
   color: string;
 }
 
-const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEdit, color }) => {
+const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEditCount, onEditTarget, color }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   
   const radius = 120;
@@ -93,18 +94,32 @@ const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, o
       </div>
 
       {/* Controls */}
-      <div className="mt-12 flex items-center space-x-4">
+      <div className="mt-12 flex items-center justify-center gap-3">
+         {/* Edit Current Count */}
          <button 
-           onClick={(e) => { e.stopPropagation(); onEdit(); }}
+           onClick={(e) => { e.stopPropagation(); onEditCount(); }}
            className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-white hover:border-slate-700 transition-all"
+           title="Manually set count"
          >
            <Pencil size={16} />
-           <span className="text-sm font-medium">Edit</span>
+           <span className="text-sm font-medium">Count</span>
          </button>
 
+         {/* Edit Tasbih (Target) */}
+         <button 
+           onClick={(e) => { e.stopPropagation(); onEditTarget(); }}
+           className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all"
+           title="Edit Target"
+         >
+           <Target size={16} />
+           <span className="text-sm font-medium">Target</span>
+         </button>
+
+         {/* Reset */}
          <button 
            onClick={(e) => { e.stopPropagation(); onReset(); }}
            className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-red-400 hover:border-red-500/30 transition-all"
+           title="Reset Counter"
          >
            <RefreshCcw size={16} />
            <span className="text-sm font-medium">Reset</span>

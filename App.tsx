@@ -6,8 +6,10 @@ import TasbihList from './components/TasbihList';
 import AddTasbihModal from './components/AddTasbihModal';
 import EditCountModal from './components/EditCountModal';
 import EditTasbihModal from './components/EditTasbihModal';
+import EditTargetModal from './components/EditTargetModal';
 import AIInsight from './components/AIInsight';
 import AnalyticsView from './components/AnalyticsView';
+import GlobalAnalyticsView from './components/GlobalAnalyticsView';
 import LandingPage from './components/LandingPage';
 import InstallButton from './components/InstallButton';
 import { ChevronLeft, BarChart2 } from 'lucide-react';
@@ -41,10 +43,43 @@ const App: React.FC = () => {
     return null;
   });
 
+  // PWA Install Logic
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // If already standalone, don't show install buttons
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstallable(false);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
+
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditCountModalOpen, setIsEditCountModalOpen] = useState(false);
   const [isEditTasbihModalOpen, setIsEditTasbihModalOpen] = useState(false);
+  const [isEditTargetModalOpen, setIsEditTargetModalOpen] = useState(false);
   const [editingTasbih, setEditingTasbih] = useState<Tasbih | null>(null);
 
   const isLoadedRef = useRef(false);
@@ -125,6 +160,14 @@ const App: React.FC = () => {
           return t;
       }));
   };
+  
+  const handleUpdateTarget = (newTarget: number) => {
+    if (!activeTasbihId) return;
+    setTasbihs(prev => prev.map(t => 
+        t.id === activeTasbihId ? { ...t, target: newTarget } : t
+    ));
+    setIsEditTargetModalOpen(false);
+  };
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this Tasbih?")) {
@@ -174,11 +217,19 @@ const App: React.FC = () => {
     setView('COUNTER');
   };
 
+  const goToGlobalStats = () => {
+      setView('GLOBAL_STATS');
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col font-sans selection:bg-emerald-500/30">
       
       {view === 'LANDING' ? (
-        <LandingPage onGetStarted={handleGetStarted} />
+        <LandingPage 
+          onGetStarted={handleGetStarted} 
+          isInstallable={isInstallable}
+          onInstall={handleInstall}
+        />
       ) : (
         <>
             {/* Header */}
@@ -194,6 +245,10 @@ const App: React.FC = () => {
                     <button onClick={goBackToCounter} className="p-2 -ml-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors">
                     <ChevronLeft size={24} />
                     </button>
+                ) : view === 'GLOBAL_STATS' ? (
+                    <button onClick={goBackToLibrary} className="p-2 -ml-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors">
+                    <ChevronLeft size={24} />
+                    </button>
                 ) : (
                     <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -206,16 +261,22 @@ const App: React.FC = () => {
                 {/* Title Center (Contextual) */}
                 <div className="absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
                     {view === 'STATS' && <span className="font-semibold text-slate-200">Analytics</span>}
+                    {view === 'GLOBAL_STATS' && <span className="font-semibold text-slate-200">Insights</span>}
                     {view === 'COUNTER' && activeTasbih && <span className="font-semibold text-slate-200 text-sm opacity-50">Counter</span>}
                 </div>
 
                 {/* Right Button */}
-                {view === 'COUNTER' && (
+                {view === 'COUNTER' ? (
                     <button onClick={goToStats} className="p-2 -mr-2 text-slate-400 hover:text-emerald-400 rounded-full hover:bg-slate-800 transition-colors">
                     <BarChart2 size={24} />
                     </button>
+                ) : view === 'LIBRARY' ? (
+                    <button onClick={goToGlobalStats} className="p-2 -mr-2 text-slate-400 hover:text-emerald-400 rounded-full hover:bg-slate-800 transition-colors">
+                    <BarChart2 size={24} />
+                    </button>
+                ) : (
+                    <div className="w-8"></div>
                 )}
-                {view !== 'COUNTER' && <div className="w-8"></div>}
                 </div>
             </header>
 
@@ -253,7 +314,8 @@ const App: React.FC = () => {
                     target={activeTasbih.target}
                     onIncrement={handleIncrement}
                     onReset={handleReset}
-                    onEdit={() => setIsEditCountModalOpen(true)}
+                    onEditCount={() => setIsEditCountModalOpen(true)}
+                    onEditTarget={() => setIsEditTargetModalOpen(true)}
                     color={activeTasbih.color || 'emerald'}
                     />
 
@@ -265,6 +327,10 @@ const App: React.FC = () => {
                 {view === 'STATS' && activeTasbih && (
                 <AnalyticsView tasbih={activeTasbih} />
                 )}
+
+                {view === 'GLOBAL_STATS' && (
+                <GlobalAnalyticsView tasbihs={tasbihs} />
+                )}
             </main>
 
             <AddTasbihModal 
@@ -274,12 +340,20 @@ const App: React.FC = () => {
             />
             
             {activeTasbih && (
-                <EditCountModal 
-                    isOpen={isEditCountModalOpen}
-                    currentCount={activeTasbih.count}
-                    onClose={() => setIsEditCountModalOpen(false)}
-                    onSave={handleUpdateCount}
-                />
+                <>
+                    <EditCountModal 
+                        isOpen={isEditCountModalOpen}
+                        currentCount={activeTasbih.count}
+                        onClose={() => setIsEditCountModalOpen(false)}
+                        onSave={handleUpdateCount}
+                    />
+                    <EditTargetModal 
+                        isOpen={isEditTargetModalOpen}
+                        currentTarget={activeTasbih.target}
+                        onClose={() => setIsEditTargetModalOpen(false)}
+                        onSave={handleUpdateTarget}
+                    />
+                </>
             )}
 
             {editingTasbih && (
@@ -293,8 +367,11 @@ const App: React.FC = () => {
         </>
       )}
 
-      {/* Global Install Button - Visible if installable */}
-      <InstallButton />
+      {/* Global Install Button - Passed props from App */}
+      <InstallButton 
+        onInstall={handleInstall} 
+        showInstallButton={isInstallable} 
+      />
     </div>
   );
 };

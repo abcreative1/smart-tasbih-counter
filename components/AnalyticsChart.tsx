@@ -39,35 +39,62 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ data, color, className 
 
   return (
     <div className={`w-full bg-slate-900 border border-slate-800 rounded-xl p-4 ${className || 'mt-6'}`}>
-      <div className="flex items-center space-x-2 mb-6">
+      <div className="flex items-center space-x-2 mb-4">
         <BarChart3 size={16} className="text-slate-400" />
         <h3 className="text-sm font-semibold text-slate-300">Activity (Last 7 Days)</h3>
       </div>
       
-      <div className="flex items-end justify-between h-40 space-x-3">
-        {chartData.map((item) => {
-          const heightPercentage = Math.max((item.value / maxVal) * 100, 4); // Min 4% height
-          
-          return (
-            <div key={item.dateKey} className="flex-1 flex flex-col items-center group">
-              <div className="relative w-full flex justify-center h-full items-end">
-                 {/* Tooltip-ish count on hover or if today */}
-                 <span className={`absolute -top-6 text-[10px] font-bold transition-opacity duration-200 ${item.isToday ? 'opacity-100 text-white' : 'opacity-0 group-hover:opacity-100 text-slate-300'}`}>
-                    {item.value}
-                 </span>
-                 
-                 {/* Bar */}
-                 <div 
-                   style={{ height: `${heightPercentage}%` }}
-                   className={`w-full max-w-[24px] rounded-t-sm transition-all duration-500 ease-out ${item.isToday ? getColorClass('500') : 'bg-slate-700 hover:bg-slate-600'}`}
-                 ></div>
-              </div>
-              <span className={`text-[10px] mt-3 font-medium ${item.isToday ? getTextClass() : 'text-slate-500'}`}>
-                {item.dayName}
-              </span>
-            </div>
-          );
-        })}
+      <div className="relative h-48 w-full">
+        {/* Background Grid Lines */}
+        <div className="absolute inset-0 flex flex-col justify-between pb-6 pl-8">
+            {[100, 50, 0].map((percent, i) => (
+                <div key={i} className="flex items-center w-full h-0">
+                    <div className="w-full border-t border-slate-800/60 border-dashed"></div>
+                </div>
+            ))}
+        </div>
+
+        {/* Y-Axis Labels */}
+        <div className="absolute inset-y-0 left-0 flex flex-col justify-between pb-6 w-8 text-right pr-2">
+            {[maxVal, Math.round(maxVal / 2), 0].map((val, i) => (
+                <span key={i} className="text-[10px] text-slate-500 leading-none">{val}</span>
+            ))}
+        </div>
+
+        {/* Bars */}
+        <div className="absolute inset-0 pl-8 pb-6 flex items-end justify-between space-x-2">
+            {chartData.map((item) => {
+                const heightPercentage = Math.max((item.value / maxVal) * 100, 2); // Min 2% for visibility of 0 values if desired, or just use 0. Here we use actual relative height but ensuring a tiny sliver if small.
+
+                return (
+                    <div key={item.dateKey} className="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
+                        {/* Hover Label */}
+                         <div className={`absolute bottom-full mb-1 transition-opacity duration-200 ${item.isToday ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} bg-slate-800 border border-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded shadow-xl whitespace-nowrap z-20`}>
+                             {item.value}
+                         </div>
+
+                        {/* Bar */}
+                        <div 
+                           style={{ height: `${heightPercentage}%` }}
+                           className={`w-full max-w-[24px] rounded-t-sm transition-all duration-500 ease-out ${item.isToday ? getColorClass('500') : 'bg-slate-800 hover:bg-slate-700 border border-slate-700/50'}`}
+                        >
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+
+        {/* X-Axis Labels */}
+        <div className="absolute bottom-0 left-8 right-0 flex justify-between space-x-2 pt-2">
+            {chartData.map((item) => (
+                <div key={item.dateKey} className="flex-1 text-center">
+                    <span className={`text-[10px] font-medium block ${item.isToday ? getTextClass() : 'text-slate-500'}`}>
+                        {item.dayName}
+                    </span>
+                </div>
+            ))}
+        </div>
+
       </div>
     </div>
   );
