@@ -19,7 +19,8 @@ const GlobalAnalyticsView: React.FC<GlobalAnalyticsViewProps> = ({ tasbihs }) =>
         
         // Aggregate daily counts
         Object.entries(t.dailyCounts).forEach(([date, count]) => {
-            aggregatedDaily[date] = (aggregatedDaily[date] || 0) + count;
+            // Fix: Cast count to number as Object.entries value can sometimes be inferred as unknown in certain TS environments
+            aggregatedDaily[date] = (aggregatedDaily[date] || 0) + (count as number);
         });
 
         // Find top tasbih

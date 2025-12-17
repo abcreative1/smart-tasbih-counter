@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Loader2, BookOpen } from 'lucide-react';
+import { Sparkles, Loader2, BookOpen, WifiOff } from 'lucide-react';
 import { getTasbihInsight } from '../services/geminiService';
 import { AIInsightResponse } from '../types';
 
@@ -11,8 +11,23 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
   const [insight, setInsight] = useState<AIInsightResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const fetchInsight = async () => {
+    if (!isOnline) return;
     setLoading(true);
     setIsOpen(true);
     const data = await getTasbihInsight(tasbihName);
@@ -30,10 +45,15 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
     return (
       <button 
         onClick={fetchInsight}
-        className="mt-6 flex items-center space-x-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full hover:bg-emerald-500/20 transition-colors"
+        disabled={!isOnline}
+        className={`mt-6 flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full transition-colors border ${
+          isOnline 
+            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20" 
+            : "text-slate-500 bg-slate-800 border-slate-700 cursor-not-allowed"
+        }`}
       >
-        <Sparkles size={14} />
-        <span>Meaning & Benefits (AI)</span>
+        {isOnline ? <Sparkles size={14} /> : <WifiOff size={14} />}
+        <span>{isOnline ? "Meaning & Benefits (AI)" : "Insights (Requires Internet)"}</span>
       </button>
     );
   }
@@ -48,7 +68,12 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
          <button onClick={() => setIsOpen(false)} className="text-slate-500 text-xs hover:text-white">Close</button>
       </div>
 
-      {loading ? (
+      {!isOnline ? (
+        <div className="flex flex-col items-center justify-center py-4 space-y-2">
+           <WifiOff className="text-slate-500" size={24} />
+           <p className="text-xs text-slate-400 text-center">Spiritual insights require an internet connection.</p>
+        </div>
+      ) : loading ? (
         <div className="flex flex-col items-center justify-center py-4 space-y-2">
            <Loader2 className="animate-spin text-emerald-500" size={24} />
            <p className="text-xs text-slate-400">Consulting knowledge...</p>
