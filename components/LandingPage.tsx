@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Activity, Moon, Shield, ChevronRight, ListPlus, Fingerprint, TrendingUp, Download } from 'lucide-react';
+import { Sparkles, Activity, Moon, Shield, ChevronRight, ListPlus, Fingerprint, TrendingUp } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -7,7 +7,7 @@ interface LandingPageProps {
   isInstallable: boolean;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isInstallable }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans selection:bg-emerald-500/30">
       
@@ -32,7 +32,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
         
         {/* Background Glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
         <div className="inline-flex items-center space-x-2 bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-full px-4 py-1.5 mb-8 animate-in fade-in slide-in-from-top-4 duration-700 shadow-xl">
            <Sparkles size={14} className="text-emerald-400" />
@@ -45,7 +44,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
         </h1>
 
         <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-          The modern digital Tasbih that helps you build a consistent Dhikr habit with smart tracking, haptic feedback, and beautiful aesthetics.
+          The modern digital Tasbih that helps you build a consistent Dhikr habit with smart tracking and beautiful aesthetics.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 w-full sm:w-auto">
@@ -56,16 +55,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
             <span>Start Counting</span>
             <ChevronRight className="ml-2 -mr-1 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-
-            {isInstallable && (
-                <button
-                onClick={onInstall}
-                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-200 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-full hover:bg-slate-800 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700 focus:ring-offset-slate-900 active:scale-95 w-full sm:w-auto"
-                >
-                <Download className="mr-2 w-5 h-5 text-emerald-400" />
-                <span>Install App</span>
-                </button>
-            )}
         </div>
 
         {/* Feature Grid */}
@@ -85,8 +74,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
            <FeatureCard 
              icon={<Shield size={24} />}
              color="amber"
-             title="Private & Offline"
-             description="No ads, no tracking. Your data stays securely on your device."
+             title="Private & Simple"
+             description="No ads, no tracking. Your data stays securely on your device browser."
            />
         </div>
       </div>
@@ -96,14 +85,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
         <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">How it Works</h2>
             <p className="text-slate-400 max-w-2xl mx-auto mb-16">
-                Designed for simplicity and focus. Start your session in seconds.
+                Designed for focus. Start your session in seconds.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                {/* Connecting Line (Desktop) */}
-                <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-slate-700 to-transparent -z-10"></div>
-
-                {/* Step 1 */}
                 <div className="flex flex-col items-center">
                     <div className="w-24 h-24 bg-slate-900 border border-slate-700 rounded-full flex items-center justify-center mb-6 shadow-xl relative z-10 group hover:border-emerald-500/50 transition-colors duration-300">
                         <ListPlus size={32} className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
@@ -115,7 +100,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
                     </p>
                 </div>
 
-                {/* Step 2 */}
                 <div className="flex flex-col items-center">
                     <div className="w-24 h-24 bg-slate-900 border border-slate-700 rounded-full flex items-center justify-center mb-6 shadow-xl relative z-10 group hover:border-emerald-500/50 transition-colors duration-300">
                         <Fingerprint size={32} className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
@@ -123,11 +107,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
                     </div>
                     <h3 className="text-xl font-semibold text-white mb-2">Tap to Count</h3>
                     <p className="text-slate-400 text-sm leading-relaxed px-4">
-                        Tap anywhere on the ring. Enjoy satisfying haptic feedback and an OLED-black interface.
+                        Tap anywhere on the ring. Focus on your Dhikr with a clean, distraction-free interface.
                     </p>
                 </div>
 
-                {/* Step 3 */}
                 <div className="flex flex-col items-center">
                     <div className="w-24 h-24 bg-slate-900 border border-slate-700 rounded-full flex items-center justify-center mb-6 shadow-xl relative z-10 group hover:border-emerald-500/50 transition-colors duration-300">
                         <TrendingUp size={32} className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
@@ -140,25 +123,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onInstall, isIn
                 </div>
             </div>
         </div>
-      </div>
-
-      {/* Final CTA Section */}
-      <div className="py-24 px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">
-                  Ready to start your journey?
-              </h2>
-              <button
-                onClick={onGetStarted}
-                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-200 bg-emerald-500 rounded-full hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 focus:ring-offset-slate-900 shadow-lg shadow-emerald-500/25 active:scale-95"
-                >
-                <span>Start Counting Now</span>
-                <ChevronRight className="ml-2 -mr-1 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <p className="mt-6 text-sm text-slate-500">
-                No account required • Free forever
-            </p>
-          </div>
       </div>
 
       <footer className="py-8 text-center border-t border-slate-900 bg-slate-950">

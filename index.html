@@ -4,9 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#020617" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="SoulCount" />
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4334/4334057.png" />
     <link rel="manifest" href="manifest.json" />
     <title>SoulCount - Smart Tasbih</title>
     
@@ -27,19 +25,22 @@
     </script>
     <style>
       body { background-color: #020617; color: white; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-      #loading-overlay {
-        position: fixed; inset: 0; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; background: #020617; z-index: 10000;
+      #root:empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
       }
-      .spinner {
-        width: 40px; height: 40px; border: 3px solid rgba(16, 185, 129, 0.1);
-        border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite;
+      #root:empty::after {
+        content: "Loading SoulCount...";
+        color: #10b981;
+        font-weight: 600;
+        animation: pulse 1.5s infinite;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      #error-display {
-        display: none; position: fixed; bottom: 0; left: 0; right: 0;
-        background: #7f1d1d; color: white; padding: 1rem; font-size: 13px; z-index: 10001;
-        max-height: 40vh; overflow-y: auto; border-top: 2px solid #ef4444;
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
       }
     </style>
     <script type="importmap">
@@ -55,47 +56,7 @@
     </script>
   </head>
   <body>
-    <div id="loading-overlay">
-      <div class="spinner"></div>
-      <p style="margin-top: 1rem; color: #10b981; font-weight: 500;">Initializing SoulCount...</p>
-      <button id="retry-btn" style="display:none; margin-top: 1rem; padding: 0.5rem 1rem; background: #1e293b; border: 1px solid #334155; color: white; border-radius: 99px;">Clear Cache & Retry</button>
-    </div>
-    
     <div id="root"></div>
-    <div id="error-display"></div>
-
     <script type="module" src="index.tsx"></script>
-    
-    <script>
-      const errDiv = document.getElementById('error-display');
-      const retryBtn = document.getElementById('retry-btn');
-      
-      function showError(msg) {
-        console.error(msg);
-        errDiv.style.display = 'block';
-        errDiv.innerHTML += '<div>' + msg + '</div>';
-        retryBtn.style.display = 'block';
-      }
-
-      retryBtn.onclick = () => {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(regs => {
-            for(let reg of regs) reg.unregister();
-            window.location.reload(true);
-          });
-        } else {
-          window.location.reload(true);
-        }
-      };
-
-      window.onerror = (m, s, l) => showError(`JS Error: ${m} at line ${l}`);
-      window.onunhandledrejection = (e) => showError(`Promise Error: ${e.reason}`);
-
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
-        });
-      }
-    </script>
   </body>
 </html>
