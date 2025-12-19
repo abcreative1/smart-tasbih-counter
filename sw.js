@@ -1,10 +1,10 @@
-const CACHE_NAME = 'soulcount-v2';
+const CACHE_NAME = 'soulcount-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/index.tsx',
   '/manifest.json',
-  'https://cdn.tailwindcss.com'
+  'https://cdn.tailwindcss.com',
+  'https://ga.jspm.io/npm:es-module-shims@1.10.1/dist/es-module-shims.js'
 ];
 
 // Domains allowed for cross-origin caching (libraries)
@@ -13,7 +13,8 @@ const TRUSTED_DOMAINS = [
   'cdn.jsdelivr.net',
   'fonts.googleapis.com',
   'fonts.gstatic.com',
-  'cdn-icons-png.flaticon.com'
+  'cdn-icons-png.flaticon.com',
+  'ga.jspm.io'
 ];
 
 self.addEventListener('install', (event) => {
@@ -63,14 +64,15 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         // Return cached, but update in background (Stale-while-revalidate)
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-          }
-          return networkResponse;
-        }).catch(() => {}); // Ignore errors in background fetch
-        
+        // Except for index.tsx which might be dynamic
+        if (!url.pathname.endsWith('.tsx')) {
+          fetch(event.request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+            }
+          }).catch(() => {});
+        }
         return cachedResponse;
       }
 
@@ -82,6 +84,7 @@ self.addEventListener('fetch', (event) => {
         const isSameOrigin = url.origin === self.location.origin;
 
         if (isSameOrigin || isTrusted) {
+          // Avoid caching large binary blobs or specific dynamic files if necessary
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }
