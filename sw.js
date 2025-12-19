@@ -1,4 +1,4 @@
-const CACHE_NAME = 'soulcount-v3';
+const CACHE_NAME = 'soulcount-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -7,7 +7,6 @@ const ASSETS_TO_CACHE = [
   'https://ga.jspm.io/npm:es-module-shims@1.10.1/dist/es-module-shims.js'
 ];
 
-// Domains allowed for cross-origin caching (libraries)
 const TRUSTED_DOMAINS = [
   'esm.sh',
   'cdn.jsdelivr.net',
@@ -46,7 +45,14 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Strategy: Network first for navigation, Cache first/SWR for assets
+  // CRITICAL: Do not cache or intercept index.tsx or any local .tsx files.
+  // These require server-side transpilation which the Service Worker might bypass or break if cached.
+  if (url.pathname.endsWith('.tsx')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Strategy: Network first for navigation to ensure the latest index.html (and its import map)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -60,31 +66,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Cache-first for other assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Return cached, but update in background (Stale-while-revalidate)
-        // Except for index.tsx which might be dynamic
-        if (!url.pathname.endsWith('.tsx')) {
-          fetch(event.request).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              const responseToCache = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-            }
-          }).catch(() => {});
-        }
         return cachedResponse;
       }
 
-      // Not in cache, fetch and cache if it's a trusted library or internal asset
       return fetch(event.request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200) return networkResponse;
 
         const isTrusted = TRUSTED_DOMAINS.some(domain => url.hostname.includes(domain));
         const isSameOrigin = url.origin === self.location.origin;
 
-        if (isSameOrigin || isTrusted) {
-          // Avoid caching large binary blobs or specific dynamic files if necessary
+        // Cache libraries and standard assets, but never TSX
+        if ((isSameOrigin || isTrusted) && !url.pathname.endsWith('.tsx')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }

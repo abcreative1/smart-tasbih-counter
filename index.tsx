@@ -2,22 +2,24 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-console.log("SoulCount: Initializing application...");
+console.log("SoulCount: Starting bootstrap...");
 
 const rootElement = document.getElementById('root');
-if (!rootElement) {
-  console.error("SoulCount: Could not find root element to mount to");
-  throw new Error("Could not find root element to mount to");
-}
 
-try {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-  console.log("SoulCount: React render complete");
-} catch (error) {
-  console.error("SoulCount: Error during initialization:", error);
+if (rootElement) {
+  try {
+    const root = ReactDOM.createRoot(rootElement);
+    // Rendering without StrictMode temporarily to ensure single pass initialization on mobile
+    root.render(<App />);
+    console.log("SoulCount: App rendered successfully");
+  } catch (error: any) {
+    console.error("SoulCount bootstrap error:", error);
+    const errDisplay = document.getElementById('error-display');
+    if (errDisplay) {
+      errDisplay.style.display = 'block';
+      errDisplay.innerText = "Initialization Error: " + error?.message;
+    }
+  }
+} else {
+  console.error("SoulCount: Root element not found");
 }
