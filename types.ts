@@ -28,5 +28,5 @@ export type ViewState = 'COUNTER' | 'LIBRARY' | 'STATS' | 'LANDING' | 'GLOBAL_ST
 export interface AppState {
   activeTasbihId: string | null;
   view: ViewState;
-  hapticEnabled: boolean;
+  soundEnabled: boolean;
 }

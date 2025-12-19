@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RefreshCcw, Pencil, Target } from 'lucide-react';
 
 interface CounterRingProps {
@@ -10,11 +10,12 @@ interface CounterRingProps {
   onEditCount: () => void;
   onEditTarget: () => void;
   color: string;
-  hapticEnabled: boolean;
+  soundEnabled: boolean;
 }
 
-const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEditCount, onEditTarget, color, hapticEnabled }) => {
+const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEditCount, onEditTarget, color, soundEnabled }) => {
   const [isAnimating, setIsAnimating] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   const radius = 120;
   const stroke = 12;
@@ -25,15 +26,85 @@ const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, o
   const progress = target > 0 ? Math.min(count / target, 1) : 1;
   const strokeDashoffset = circumference - progress * circumference;
 
+  // Initialize Audio Context on user interaction to comply with browser policies
+  const getAudioContext = () => {
+      if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
+      }
+      return audioContextRef.current;
+  };
+
+  const playClickSound = () => {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        // Connect oscillator -> gain -> output
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        // Soft wooden click / bead sound simulation
+        // Using a low frequency sine wave that drops quickly
+        const now = ctx.currentTime;
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
+
+        // Short envelope
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+        osc.start(now);
+        osc.stop(now + 0.06);
+    } catch (e) {
+        console.error("Audio playback failed", e);
+    }
+  };
+
+  const playTargetSound = () => {
+      if (!soundEnabled) return;
+      try {
+          const ctx = getAudioContext();
+          const now = ctx.currentTime;
+          
+          // Play two notes as a "chime"
+          [523.25, 659.25].forEach((freq, i) => { // C5, E5
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              
+              const startTime = now + (i * 0.1);
+              osc.frequency.setValueAtTime(freq, startTime);
+              
+              gain.gain.setValueAtTime(0.1, startTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+              
+              osc.start(startTime);
+              osc.stop(startTime + 0.5);
+          });
+      } catch (e) {
+          console.error("Target audio failed", e);
+      }
+  }
+
   const handleClick = () => {
     setIsAnimating(true);
-    // Haptic feedback if available and enabled
-    if (hapticEnabled && typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(10); 
-        if (target > 0 && count + 1 === target) {
-             navigator.vibrate([50, 50, 50]); // Stronger vibe on completion
-        }
+    
+    // Play sound feedback
+    playClickSound();
+
+    // Check if next count hits target
+    if (target > 0 && count + 1 === target) {
+        setTimeout(() => {
+            playTargetSound();
+        }, 100);
     }
+    
     onIncrement();
     setTimeout(() => setIsAnimating(false), 200);
   };
@@ -48,8 +119,9 @@ const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, o
     <div className="relative flex flex-col items-center justify-center py-8">
       {/* Interactive Area */}
       <div 
-        className={`relative cursor-pointer transition-transform duration-100 ${isAnimating ? 'scale-95' : 'scale-100'}`}
+        className={`relative cursor-pointer transition-transform duration-100 ${isAnimating ? 'scale-95' : 'scale-100'} tap-highlight-transparent`}
         onClick={handleClick}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <svg
           height={radius * 2}

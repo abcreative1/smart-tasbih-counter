@@ -33,16 +33,19 @@ export const loadAppState = (): AppState => {
     const stored = localStorage.getItem(STATE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
+      // Migrate hapticEnabled to soundEnabled if it exists
+      const soundSetting = parsed.soundEnabled ?? parsed.hapticEnabled ?? true;
+      
       return {
         activeTasbihId: null,
         view: 'LIBRARY',
-        hapticEnabled: true,
+        soundEnabled: soundSetting,
         ...parsed
       };
     }
-    return { activeTasbihId: null, view: 'LIBRARY', hapticEnabled: true };
+    return { activeTasbihId: null, view: 'LIBRARY', soundEnabled: true };
   } catch (e) {
-    return { activeTasbihId: null, view: 'LIBRARY', hapticEnabled: true };
+    return { activeTasbihId: null, view: 'LIBRARY', soundEnabled: true };
   }
 };
 

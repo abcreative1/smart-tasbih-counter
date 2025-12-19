@@ -12,7 +12,7 @@ import AnalyticsView from './components/AnalyticsView';
 import GlobalAnalyticsView from './components/GlobalAnalyticsView';
 import LandingPage from './components/LandingPage';
 import AIInsight from './components/AIInsight';
-import { ChevronLeft, BarChart2, Vibrate, VibrateOff, Info } from 'lucide-react';
+import { ChevronLeft, BarChart2, Volume2, VolumeX, Info } from 'lucide-react';
 
 const App: React.FC = () => {
   const [tasbihs, setTasbihs] = useState<Tasbih[]>(() => loadTasbihs());
@@ -35,12 +35,8 @@ const App: React.FC = () => {
     return null;
   });
 
-  const [hapticFeedbackEnabled, setHapticFeedbackEnabled] = useState<boolean>(initialAppState.hapticEnabled ?? true);
-  const [isHapticSupported, setIsHapticSupported] = useState<boolean>(true);
-
-  useEffect(() => {
-    setIsHapticSupported(typeof navigator !== 'undefined' && !!navigator.vibrate);
-  }, []);
+  // Replaced hapticEnabled with soundEnabled
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(initialAppState.soundEnabled ?? true);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditCountModalOpen, setIsEditCountModalOpen] = useState(false);
@@ -62,9 +58,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isLoadedRef.current && view !== 'LANDING') {
-        saveAppState({ activeTasbihId, view, hapticEnabled: hapticFeedbackEnabled });
+        saveAppState({ activeTasbihId, view, soundEnabled });
     }
-  }, [activeTasbihId, view, hapticFeedbackEnabled]);
+  }, [activeTasbihId, view, soundEnabled]);
 
   const handleGetStarted = () => {
       localStorage.setItem('soulcount_has_onboarded', 'true');
@@ -183,12 +179,8 @@ const App: React.FC = () => {
       setView('GLOBAL_STATS');
   };
 
-  const toggleHaptic = () => {
-    if (!isHapticSupported) {
-        alert("Vibration API is not supported by your device or browser (e.g., iOS Safari).");
-        return;
-    }
-    setHapticFeedbackEnabled(prev => !prev);
+  const toggleSound = () => {
+    setSoundEnabled(prev => !prev);
   };
 
   return (
@@ -235,14 +227,13 @@ const App: React.FC = () => {
                 <div className="flex items-center">
                     {(view === 'COUNTER' || view === 'LIBRARY') && (
                         <button 
-                            onClick={toggleHaptic} 
+                            onClick={toggleSound} 
                             className={`p-2 mr-1 rounded-full transition-all flex items-center ${
-                                !isHapticSupported ? 'opacity-30 cursor-not-allowed text-slate-500' :
-                                hapticFeedbackEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-600'
+                                soundEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-600'
                             }`}
-                            title={!isHapticSupported ? "Not supported on this device" : hapticFeedbackEnabled ? "Haptic Enabled" : "Haptic Disabled"}
+                            title={soundEnabled ? "Sound Enabled" : "Sound Disabled"}
                         >
-                            {hapticFeedbackEnabled && isHapticSupported ? <Vibrate size={20} /> : <VibrateOff size={20} />}
+                            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
                         </button>
                     )}
 
@@ -296,7 +287,7 @@ const App: React.FC = () => {
                     onEditCount={() => setIsEditCountModalOpen(true)}
                     onEditTarget={() => setIsEditTargetModalOpen(true)}
                     color={activeTasbih.color || 'emerald'}
-                    hapticEnabled={hapticFeedbackEnabled && isHapticSupported}
+                    soundEnabled={soundEnabled}
                     />
 
                     <AIInsight tasbihName={activeTasbih.title} />
