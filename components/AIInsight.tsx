@@ -36,7 +36,6 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
     setLoading(false);
   };
 
-  // Reset when tasbih changes
   useEffect(() => {
     setInsight(null);
     setIsOpen(false);
@@ -96,11 +95,10 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
             </div>
           )}
           
-          {/* AI Accuracy Disclaimer */}
           <div className="flex items-start space-x-2 text-[10px] text-slate-500 mt-4 pt-3 border-t border-slate-700/50">
             <AlertTriangle size={10} className="mt-0.5 flex-shrink-0" />
             <p className="leading-tight">
-              AI can make mistakes and may be incorrect. Please verify important spiritual information with authentic religious sources and scholars.
+              AI can make mistakes and may be incorrect. Please verify spiritual information with authentic religious sources.
             </p>
           </div>
         </div>

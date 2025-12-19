@@ -2,12 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIInsightResponse } from "../types";
 
-/**
- * Fetches spiritual insights for a specific tasbih using Gemini.
- * Adheres to @google/genai SDK guidelines for content generation and JSON schema.
- */
 export const getTasbihInsight = async (tasbihName: string): Promise<AIInsightResponse | null> => {
-  // Use process.env.API_KEY directly as per guidelines
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
     console.warn("Gemini API Key missing. Insights disabled.");
@@ -15,7 +10,6 @@ export const getTasbihInsight = async (tasbihName: string): Promise<AIInsightRes
   }
 
   try {
-    // Create new instance right before making the call
     const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-3-flash-preview';
     const prompt = `Provide a spiritual insight for the Dhikr: "${tasbihName}". 
@@ -51,7 +45,6 @@ export const getTasbihInsight = async (tasbihName: string): Promise<AIInsightRes
       }
     });
 
-    // Access .text property directly (not a method)
     const text = response.text;
     if (!text) return null;
 

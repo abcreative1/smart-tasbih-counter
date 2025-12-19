@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Tasbih } from '../types';
 import AnalyticsChart from './AnalyticsChart';
@@ -17,19 +18,15 @@ const GlobalAnalyticsView: React.FC<GlobalAnalyticsViewProps> = ({ tasbihs }) =>
     tasbihs.forEach(t => {
         totalLifetime += t.totalCount;
         
-        // Aggregate daily counts
         Object.entries(t.dailyCounts).forEach(([date, count]) => {
-            // Fix: Cast count to number as Object.entries value can sometimes be inferred as unknown in certain TS environments
             aggregatedDaily[date] = (aggregatedDaily[date] || 0) + (count as number);
         });
 
-        // Find top tasbih
         if (!topTasbih || t.totalCount > topTasbih.totalCount) {
             topTasbih = t;
         }
     });
 
-    // Calculate today's total
     const today = new Date().toISOString().split('T')[0];
     const todayTotal = aggregatedDaily[today] || 0;
 
@@ -44,7 +41,6 @@ const GlobalAnalyticsView: React.FC<GlobalAnalyticsViewProps> = ({ tasbihs }) =>
          <p className="text-slate-500 text-sm mt-1">Your Spiritual Journey</p>
        </div>
 
-       {/* Hero Stat */}
        <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/20 p-6 rounded-3xl flex flex-col items-center justify-center space-y-2 mb-6 shadow-xl shadow-emerald-900/10 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-10">
                 <Activity size={100} className="text-emerald-400" />
@@ -57,7 +53,6 @@ const GlobalAnalyticsView: React.FC<GlobalAnalyticsViewProps> = ({ tasbihs }) =>
             </div>
        </div>
 
-       {/* Secondary Stats Grid */}
        <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex flex-col items-start space-y-3 shadow-lg shadow-black/20">
              <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
@@ -85,7 +80,6 @@ const GlobalAnalyticsView: React.FC<GlobalAnalyticsViewProps> = ({ tasbihs }) =>
           </div>
        </div>
 
-       {/* Chart Section */}
        <div className="mb-8">
           <h3 className="text-slate-400 text-sm font-semibold mb-3 px-1">Recent Activity</h3>
           <AnalyticsChart 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tasbih } from '../types';
 import AnalyticsChart from './AnalyticsChart';
@@ -16,7 +17,6 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tasbih }) => {
          <p className="text-slate-500 text-sm mt-1">Performance & History</p>
        </div>
 
-       {/* Summary Cards */}
        <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex flex-col items-start space-y-3 shadow-lg shadow-black/20">
              <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
@@ -39,7 +39,6 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tasbih }) => {
           </div>
        </div>
 
-       {/* Chart Section */}
        <div className="mb-8">
           <AnalyticsChart 
             data={tasbih.dailyCounts} 

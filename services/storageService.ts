@@ -7,7 +7,6 @@ export const loadTasbihs = (): Tasbih[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Migration: Ensure all tasbihs have dailyCounts and isFavorite if loaded from old state
       return parsed.map((t: any) => ({
         ...t,
         dailyCounts: t.dailyCounts || {},

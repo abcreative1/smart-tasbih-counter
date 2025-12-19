@@ -12,7 +12,7 @@ import AnalyticsView from './components/AnalyticsView';
 import GlobalAnalyticsView from './components/GlobalAnalyticsView';
 import LandingPage from './components/LandingPage';
 import AIInsight from './components/AIInsight';
-import { ChevronLeft, BarChart2, Vibrate, VibrateOff } from 'lucide-react';
+import { ChevronLeft, BarChart2, Vibrate, VibrateOff, Info } from 'lucide-react';
 
 const App: React.FC = () => {
   const [tasbihs, setTasbihs] = useState<Tasbih[]>(() => loadTasbihs());
@@ -36,10 +36,15 @@ const App: React.FC = () => {
   });
 
   const [hapticFeedbackEnabled, setHapticFeedbackEnabled] = useState<boolean>(initialAppState.hapticEnabled ?? true);
+  const [isHapticSupported, setIsHapticSupported] = useState<boolean>(true);
+
+  useEffect(() => {
+    setIsHapticSupported(typeof navigator !== 'undefined' && !!navigator.vibrate);
+  }, []);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditCountModalOpen, setIsEditCountModalOpen] = useState(false);
-  const [isEditTasbihModalOpen, setIsEditTasbihModalOpen] = useState(false);
+  const [isEditTasbihOpen, setIsEditTasbihOpen] = useState(false);
   const [isEditTargetModalOpen, setIsEditTargetModalOpen] = useState(false);
   const [editingTasbih, setEditingTasbih] = useState<Tasbih | null>(null);
 
@@ -142,7 +147,7 @@ const App: React.FC = () => {
 
   const handleEditTasbih = (tasbih: Tasbih) => {
     setEditingTasbih(tasbih);
-    setIsEditTasbihModalOpen(true);
+    setIsEditTasbihOpen(true);
   };
 
   const handleSaveTasbih = (updatedTasbih: Tasbih) => {
@@ -179,6 +184,10 @@ const App: React.FC = () => {
   };
 
   const toggleHaptic = () => {
+    if (!isHapticSupported) {
+        alert("Vibration API is not supported by your device or browser (e.g., iOS Safari).");
+        return;
+    }
     setHapticFeedbackEnabled(prev => !prev);
   };
 
@@ -227,10 +236,13 @@ const App: React.FC = () => {
                     {(view === 'COUNTER' || view === 'LIBRARY') && (
                         <button 
                             onClick={toggleHaptic} 
-                            className={`p-2 mr-1 rounded-full transition-all ${hapticFeedbackEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-600'}`}
-                            title={hapticFeedbackEnabled ? "Haptic Feedback Enabled" : "Haptic Feedback Disabled"}
+                            className={`p-2 mr-1 rounded-full transition-all flex items-center ${
+                                !isHapticSupported ? 'opacity-30 cursor-not-allowed text-slate-500' :
+                                hapticFeedbackEnabled ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-600'
+                            }`}
+                            title={!isHapticSupported ? "Not supported on this device" : hapticFeedbackEnabled ? "Haptic Enabled" : "Haptic Disabled"}
                         >
-                            {hapticFeedbackEnabled ? <Vibrate size={20} /> : <VibrateOff size={20} />}
+                            {hapticFeedbackEnabled && isHapticSupported ? <Vibrate size={20} /> : <VibrateOff size={20} />}
                         </button>
                     )}
 
@@ -267,11 +279,11 @@ const App: React.FC = () => {
                     
                     <div className="mt-8 mb-4 text-center px-6 min-h-[100px] flex flex-col items-center justify-end">
                     {activeTasbih.arabicTitle && (
-                        <h2 className="text-3xl font-arabic text-emerald-400 mb-1 leading-loose drop-shadow-lg shadow-emerald-500/10">
+                        <h2 className="text-4xl font-arabic text-emerald-400 mb-2 leading-relaxed drop-shadow-lg shadow-emerald-500/10">
                         {activeTasbih.arabicTitle}
                         </h2>
                     )}
-                    <h2 className={`${activeTasbih.arabicTitle ? 'text-sm font-medium text-slate-400 uppercase tracking-widest' : 'text-2xl font-bold text-emerald-400'} mb-2`}>
+                    <h2 className={`${activeTasbih.arabicTitle ? 'text-sm font-medium text-slate-500 uppercase tracking-widest' : 'text-2xl font-bold text-emerald-400'} mb-2`}>
                     {activeTasbih.title}
                     </h2>
                     </div>
@@ -284,10 +296,9 @@ const App: React.FC = () => {
                     onEditCount={() => setIsEditCountModalOpen(true)}
                     onEditTarget={() => setIsEditTargetModalOpen(true)}
                     color={activeTasbih.color || 'emerald'}
-                    hapticEnabled={hapticFeedbackEnabled}
+                    hapticEnabled={hapticFeedbackEnabled && isHapticSupported}
                     />
 
-                    {/* Show spiritual insights for the current Dhikr */}
                     <AIInsight tasbihName={activeTasbih.title} />
 
                 </div>
@@ -327,9 +338,9 @@ const App: React.FC = () => {
 
             {editingTasbih && (
                 <EditTasbihModal
-                isOpen={isEditTasbihModalOpen}
+                isOpen={isEditTasbihOpen}
                 tasbih={editingTasbih}
-                onClose={() => setIsEditTasbihModalOpen(false)}
+                onClose={() => setIsEditTasbihOpen(false)}
                 onSave={handleSaveTasbih}
                 />
             )}
