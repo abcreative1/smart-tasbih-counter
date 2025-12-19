@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Loader2, BookOpen, WifiOff } from 'lucide-react';
+import { Sparkles, Loader2, BookOpen, WifiOff, AlertTriangle } from 'lucide-react';
 import { getTasbihInsight } from '../services/geminiService';
 import { AIInsightResponse } from '../types';
 
@@ -94,6 +95,14 @@ const AIInsight: React.FC<AIInsightProps> = ({ tasbihName }) => {
               <span className="italic">{insight.source}</span>
             </div>
           )}
+          
+          {/* AI Accuracy Disclaimer */}
+          <div className="flex items-start space-x-2 text-[10px] text-slate-500 mt-4 pt-3 border-t border-slate-700/50">
+            <AlertTriangle size={10} className="mt-0.5 flex-shrink-0" />
+            <p className="leading-tight">
+              AI can make mistakes and may be incorrect. Please verify important spiritual information with authentic religious sources and scholars.
+            </p>
+          </div>
         </div>
       ) : (
         <p className="text-xs text-red-400">Could not retrieve insights. Please try again later.</p>

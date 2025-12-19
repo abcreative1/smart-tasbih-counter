@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sparkles, Activity, Moon, Shield, ChevronRight, ListPlus, Fingerprint, TrendingUp } from 'lucide-react';
 
@@ -35,7 +36,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
         <div className="inline-flex items-center space-x-2 bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-full px-4 py-1.5 mb-8 animate-in fade-in slide-in-from-top-4 duration-700 shadow-xl">
            <Sparkles size={14} className="text-emerald-400" />
-           <span className="text-xs font-medium text-slate-300">AI-Powered Spiritual Insights</span>
+           <span className="text-xs font-medium text-slate-300">Clean, Focused, and Spiritual</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 leading-tight">
@@ -44,7 +45,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </h1>
 
         <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-          The modern digital Tasbih that helps you build a consistent Dhikr habit with smart tracking and beautiful aesthetics.
+          The modern digital Tasbih that helps you build a consistent Dhikr habit with smart tracking
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 w-full sm:w-auto">
@@ -118,7 +119,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     </div>
                     <h3 className="text-xl font-semibold text-white mb-2">Track & Reflect</h3>
                     <p className="text-slate-400 text-sm leading-relaxed px-4">
-                        View your streaks and lifetime stats. Use AI to learn the deeper meanings of your Dhikr.
+                        View your streaks and lifetime stats. Stay consistent with intuitive visual feedback.
                     </p>
                 </div>
             </div>

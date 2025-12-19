@@ -1,3 +1,4 @@
+
 export interface Tasbih {
   id: string;
   title: string;
@@ -15,15 +16,17 @@ export interface TasbihLog {
   count: number;
 }
 
+/* Interface for AI-generated spiritual insights, used by geminiService */
+export interface AIInsightResponse {
+  meaning: string;
+  benefit: string;
+  source?: string | null;
+}
+
 export type ViewState = 'COUNTER' | 'LIBRARY' | 'STATS' | 'LANDING' | 'GLOBAL_STATS';
 
 export interface AppState {
   activeTasbihId: string | null;
   view: ViewState;
-}
-
-export interface AIInsightResponse {
-  meaning: string;
-  benefit: string;
-  source?: string;
+  hapticEnabled: boolean;
 }

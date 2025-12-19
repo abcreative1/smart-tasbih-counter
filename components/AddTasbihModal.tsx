@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Tasbih } from '../types';
@@ -14,6 +15,8 @@ const AddTasbihModal: React.FC<AddTasbihModalProps> = ({ isOpen, onClose, onAdd 
   const [target, setTarget] = useState<string>('33');
 
   if (!isOpen) return null;
+
+  const presets = ['33', '99', '100', '1000', '0'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,18 +77,34 @@ const AddTasbihModal: React.FC<AddTasbihModalProps> = ({ isOpen, onClose, onAdd 
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Target Count</label>
-            <select 
+            <label className="block text-sm text-slate-400 mb-2">Target Count</label>
+            
+            <div className="flex flex-wrap gap-2 mb-3">
+              {presets.map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setTarget(p)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                    target === p 
+                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" 
+                    : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
+                  }`}
+                >
+                  {p === '0' ? 'Infinite' : p}
+                </button>
+              ))}
+            </div>
+
+            <input 
+              type="number" 
+              min="0"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500"
-            >
-              <option value="33">33</option>
-              <option value="99">99</option>
-              <option value="100">100</option>
-              <option value="0">Infinite (No limit)</option>
-              <option value="1000">1000</option>
-            </select>
+              placeholder="Custom value..."
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+            />
+            <p className="text-[10px] text-slate-500 mt-1">Set 0 for infinite counter (no goal notification).</p>
           </div>
 
           <div className="pt-4">

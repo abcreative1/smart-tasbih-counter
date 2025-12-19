@@ -1,3 +1,4 @@
+
 import { Tasbih, AppState } from '../types';
 import { STORAGE_KEY, STATE_KEY, PREDEFINED_TASBIHS } from '../constants';
 
@@ -32,11 +33,17 @@ export const loadAppState = (): AppState => {
   try {
     const stored = localStorage.getItem(STATE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      return {
+        activeTasbihId: null,
+        view: 'LIBRARY',
+        hapticEnabled: true,
+        ...parsed
+      };
     }
-    return { activeTasbihId: null, view: 'LIBRARY' };
+    return { activeTasbihId: null, view: 'LIBRARY', hapticEnabled: true };
   } catch (e) {
-    return { activeTasbihId: null, view: 'LIBRARY' };
+    return { activeTasbihId: null, view: 'LIBRARY', hapticEnabled: true };
   }
 };
 

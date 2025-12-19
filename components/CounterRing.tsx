@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { RefreshCcw, Pencil, Target } from 'lucide-react';
 
@@ -9,9 +10,10 @@ interface CounterRingProps {
   onEditCount: () => void;
   onEditTarget: () => void;
   color: string;
+  hapticEnabled: boolean;
 }
 
-const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEditCount, onEditTarget, color }) => {
+const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, onReset, onEditCount, onEditTarget, color, hapticEnabled }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   
   const radius = 120;
@@ -25,8 +27,8 @@ const CounterRing: React.FC<CounterRingProps> = ({ count, target, onIncrement, o
 
   const handleClick = () => {
     setIsAnimating(true);
-    // Haptic feedback if available
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    // Haptic feedback if available and enabled
+    if (hapticEnabled && typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10); 
         if (target > 0 && count + 1 === target) {
              navigator.vibrate([50, 50, 50]); // Stronger vibe on completion
