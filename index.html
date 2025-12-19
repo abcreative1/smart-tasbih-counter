@@ -10,7 +10,6 @@
     <link rel="manifest" href="manifest.json" />
     <title>SoulCount - Smart Tasbih</title>
     
-    <!-- Polyfill for Import Maps -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.1/dist/es-module-shims.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,110 +18,82 @@
         theme: {
           extend: {
             colors: {
-              emerald: {
-                400: '#34d399',
-                500: '#10b981',
-                600: '#059669',
-                900: '#064e3b',
-              },
-              slate: {
-                800: '#1e293b',
-                900: '#0f172a',
-                950: '#020617',
-              }
+              emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 900: '#064e3b' },
+              slate: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
             }
           }
         }
       }
     </script>
     <style>
-      body {
-        background-color: #020617;
-        color: white;
-        margin: 0;
-        font-family: system-ui, -apple-system, sans-serif;
-        overflow-x: hidden;
+      body { background-color: #020617; color: white; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+      #loading-overlay {
+        position: fixed; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; background: #020617; z-index: 10000;
       }
-      #root:empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        width: 100vw;
+      .spinner {
+        width: 40px; height: 40px; border: 3px solid rgba(16, 185, 129, 0.1);
+        border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite;
       }
-      #root:empty::after {
-        content: "Initializing...";
-        color: #10b981;
-        font-weight: 600;
-        animation: pulse 1.5s infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
+      @keyframes spin { to { transform: rotate(360deg); } }
       #error-display {
-        display: none;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(127, 29, 29, 0.95);
-        color: white;
-        padding: 1rem;
-        font-size: 12px;
-        z-index: 9999;
-        max-height: 30vh;
-        overflow-y: auto;
+        display: none; position: fixed; bottom: 0; left: 0; right: 0;
+        background: #7f1d1d; color: white; padding: 1rem; font-size: 13px; z-index: 10001;
+        max-height: 40vh; overflow-y: auto; border-top: 2px solid #ef4444;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
-    "react/": "https://esm.sh/react@^19.2.1/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.560.0"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@19.0.0",
+        "react-dom/": "https://esm.sh/react-dom@19.0.0/",
+        "react/": "https://esm.sh/react@19.0.0/",
+        "@google/genai": "https://esm.sh/@google/genai@1.33.0",
+        "lucide-react": "https://esm.sh/lucide-react@0.460.0"
+      }
+    }
+    </script>
+  </head>
   <body>
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <p style="margin-top: 1rem; color: #10b981; font-weight: 500;">Initializing SoulCount...</p>
+      <button id="retry-btn" style="display:none; margin-top: 1rem; padding: 0.5rem 1rem; background: #1e293b; border: 1px solid #334155; color: white; border-radius: 99px;">Clear Cache & Retry</button>
+    </div>
+    
     <div id="root"></div>
     <div id="error-display"></div>
 
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
     
     <script>
       const errDiv = document.getElementById('error-display');
+      const retryBtn = document.getElementById('retry-btn');
+      
       function showError(msg) {
         console.error(msg);
         errDiv.style.display = 'block';
         errDiv.innerHTML += '<div>' + msg + '</div>';
+        retryBtn.style.display = 'block';
       }
 
-      // If root is still empty after 6 seconds, something went wrong with the script load
-      setTimeout(() => {
-        const root = document.getElementById('root');
-        if (root && root.innerHTML === "") {
-          showError("App failed to initialize. Please check if your browser supports ES Modules or try refreshing.");
+      retryBtn.onclick = () => {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            for(let reg of regs) reg.unregister();
+            window.location.reload(true);
+          });
+        } else {
+          window.location.reload(true);
         }
-      }, 6000);
-
-      window.onerror = function(message, source, lineno, colno, error) {
-        showError("Error: " + message + " (Line " + lineno + ")");
       };
-      
-      window.addEventListener('unhandledrejection', function(event) {
-        showError("Promise rejection: " + event.reason);
-      });
+
+      window.onerror = (m, s, l) => showError(`JS Error: ${m} at line ${l}`);
+      window.onunhandledrejection = (e) => showError(`Promise Error: ${e.reason}`);
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Use relative path for sw.js
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('SW Registered', reg.scope))
-            .catch(err => console.log('SW Registration failed:', err));
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
         });
       }
     </script>

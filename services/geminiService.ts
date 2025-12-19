@@ -1,12 +1,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIInsightResponse } from "../types";
 
-// Always initialize with API key from process.env.API_KEY using named parameter as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper to safely get the API Key without crashing initialization
+const getApiKey = () => {
+  try {
+    return process.env.API_KEY || '';
+  } catch {
+    return '';
+  }
+};
 
 export const getTasbihInsight = async (tasbihName: string): Promise<AIInsightResponse | null> => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    console.warn("Gemini API Key missing. Insights disabled.");
+    return null;
+  }
+
   try {
-    // Using gemini-3-flash-preview for basic text tasks (e.g., summarization, simple Q&A)
+    const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-3-flash-preview';
     const prompt = `Provide a spiritual insight for the Dhikr: "${tasbihName}". 
     Return a JSON object with:
@@ -23,31 +35,17 @@ export const getTasbihInsight = async (tasbihName: string): Promise<AIInsightRes
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            meaning: { 
-              type: Type.STRING,
-              description: 'The English translation/meaning of the Dhikr.'
-            },
-            benefit: { 
-              type: Type.STRING,
-              description: 'Spiritual benefit or reward in Islam.'
-            },
-            source: { 
-              type: Type.STRING,
-              description: 'Canonical source or reference.'
-            },
+            meaning: { type: Type.STRING },
+            benefit: { type: Type.STRING },
+            source: { type: Type.STRING, nullable: true },
           },
           required: ["meaning", "benefit"],
-          propertyOrdering: ["meaning", "benefit", "source"]
         }
       }
     });
 
-    // Access the .text property directly (do not call as a method)
     const jsonStr = response.text?.trim();
-    if (jsonStr) {
-        return JSON.parse(jsonStr) as AIInsightResponse;
-    }
-    return null;
+    return jsonStr ? JSON.parse(jsonStr) : null;
   } catch (error) {
     console.error("Error fetching AI insight:", error);
     return null;
