@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SoulCount" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <title>SoulCount - Smart Tasbih</title>
     
     <!-- Polyfill for Import Maps -->
@@ -96,12 +96,21 @@
     <script>
       const errDiv = document.getElementById('error-display');
       function showError(msg) {
+        console.error(msg);
         errDiv.style.display = 'block';
         errDiv.innerHTML += '<div>' + msg + '</div>';
       }
 
+      // If root is still empty after 6 seconds, something went wrong with the script load
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (root && root.innerHTML === "") {
+          showError("App failed to initialize. Please check if your browser supports ES Modules or try refreshing.");
+        }
+      }, 6000);
+
       window.onerror = function(message, source, lineno, colno, error) {
-        showError("Error: " + message + " at " + lineno);
+        showError("Error: " + message + " (Line " + lineno + ")");
       };
       
       window.addEventListener('unhandledrejection', function(event) {
@@ -110,8 +119,10 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .catch(err => console.log('SW failed:', err));
+          // Use relative path for sw.js
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('SW Registered', reg.scope))
+            .catch(err => console.log('SW Registration failed:', err));
         });
       }
     </script>

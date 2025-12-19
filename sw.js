@@ -1,8 +1,8 @@
-const CACHE_NAME = 'soulcount-v4';
+const CACHE_NAME = 'soulcount-v5';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  'index.html',
+  'manifest.json',
   'https://cdn.tailwindcss.com',
   'https://ga.jspm.io/npm:es-module-shims@1.10.1/dist/es-module-shims.js'
 ];
@@ -20,7 +20,14 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      // Use {cache: 'reload'} to bypass local cache when pre-caching
+      return Promise.all(
+        ASSETS_TO_CACHE.map(url => {
+          return fetch(new Request(url, { cache: 'reload' }))
+            .then(res => cache.put(url, res))
+            .catch(err => console.warn('Failed to pre-cache:', url, err));
+        })
+      );
     })
   );
 });
@@ -45,14 +52,13 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // CRITICAL: Do not cache or intercept index.tsx or any local .tsx files.
-  // These require server-side transpilation which the Service Worker might bypass or break if cached.
-  if (url.pathname.endsWith('.tsx')) {
-    event.respondWith(fetch(event.request));
-    return;
+  // CRITICAL: Absolutely never intercept .tsx files.
+  // These require the environment's special transpiler.
+  if (url.pathname.includes('.tsx')) {
+    return; // Let the browser handle it via network
   }
 
-  // Strategy: Network first for navigation to ensure the latest index.html (and its import map)
+  // Strategy: Network first for index.html/Navigation
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -61,7 +67,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(() => caches.match('index.html'))
     );
     return;
   }
@@ -79,8 +85,8 @@ self.addEventListener('fetch', (event) => {
         const isTrusted = TRUSTED_DOMAINS.some(domain => url.hostname.includes(domain));
         const isSameOrigin = url.origin === self.location.origin;
 
-        // Cache libraries and standard assets, but never TSX
-        if ((isSameOrigin || isTrusted) && !url.pathname.endsWith('.tsx')) {
+        // Never cache TSX files if they somehow got here
+        if ((isSameOrigin || isTrusted) && !url.pathname.includes('.tsx')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }

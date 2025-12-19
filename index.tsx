@@ -2,24 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-console.log("SoulCount: Starting bootstrap...");
+console.log("SoulCount: Initializing boot sequence...");
 
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
   try {
     const root = ReactDOM.createRoot(rootElement);
-    // Rendering without StrictMode temporarily to ensure single pass initialization on mobile
     root.render(<App />);
-    console.log("SoulCount: App rendered successfully");
+    console.log("SoulCount: Successfully mounted React application.");
   } catch (error: any) {
-    console.error("SoulCount bootstrap error:", error);
+    console.error("SoulCount: Critical render error:", error);
     const errDisplay = document.getElementById('error-display');
     if (errDisplay) {
       errDisplay.style.display = 'block';
-      errDisplay.innerText = "Initialization Error: " + error?.message;
+      errDisplay.innerText = "Fatal Error: " + (error?.message || "Unknown rendering error");
     }
   }
 } else {
-  console.error("SoulCount: Root element not found");
+  console.error("SoulCount: Target container #root not found in DOM.");
 }
